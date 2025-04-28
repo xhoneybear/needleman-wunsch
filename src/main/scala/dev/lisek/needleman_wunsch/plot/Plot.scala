@@ -8,6 +8,7 @@ import org.nspl.awtrenderer._
 import org.nspl.data.DataMatrix
 import scala.io.StdIn.readInt
 import scala.math.max
+import dev.lisek.needleman_wunsch.util.StringUtils.resultString
 
 object Plot:
     def plot(seq1: (String, String), seq2: (String, String), density: Array[Array[Double]], tracks: Array[(String, String)]): Unit =
@@ -71,7 +72,9 @@ object Plot:
 
         while frame.isVisible do
             try
-                update(group(plot1, plot2(readInt - 1), ZDepth))
+                val i = readInt - 1
+                update(group(plot1, plot2(i), ZDepth))
+                print(resultString(tracks(i)(0), tracks(i)(1)))
                 // print("\u033c")
             catch
                 case _: NumberFormatException =>

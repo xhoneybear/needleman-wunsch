@@ -25,7 +25,7 @@ object Track:
         var out = "--- Evaluation results ---\n"
         out ++= s"\nSequence 1: ${seq1(0)}"
         out ++= s"\nSequence 2: ${seq2(0)}\n"
-        out ++= "\nConnections:\n"
+        out ++= "\nConnections:\n\n"
 
         output(file, out)
 
@@ -42,7 +42,7 @@ object Track:
             seq2(1).length
         )
 
-        out = s"\nSimilarity score: ${matrix(seq1(1).length)(seq2(1).length)}"
+        out = s"Similarity score: ${matrix(seq1(1).length)(seq2(1).length)}"
 
         output(file, out)
 
@@ -80,9 +80,7 @@ object Track:
             val trace1 = (sub1 +: alignSeq1).mkString
             val trace2 = (sub2 +: alignSeq2).mkString
 
-            var out = resultString(trace1, trace2)
-
-            output(file, out)
+            output(file, resultString(trace1, trace2))
 
             tracks = tracks :+ (trace1.mkString, trace2.mkString)
 

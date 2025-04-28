@@ -12,13 +12,13 @@ object StringUtils:
         val matches = connection.count(_ == '|')
         val maxLen = max(seq1.length, seq2.length)
 
-        var out = s"\n$seq1"
+        var out = s"$seq1"
         out ++= s"\n$connection"
         out ++= s"\n$seq2\n"
         out ++= s"\nGaps: ${seq1.count(_ == '-') + seq2.count(_ == '-')}"
         out ++= s"\n- Sequence 1: ${seq1.count(_ == '-')}"
         out ++= s"\n- Sequence 2: ${seq2.count(_ == '-')}\n"
-        out ++= s"\nMatches: $matches of $maxLen (${"%.2f".format(100 * matches.toDouble / maxLen)}%)\n"
+        out ++= s"\nMatches: $matches of $maxLen (${"%.2f".format(100 * matches.toDouble / maxLen)}%)\n\n"
         out
 
     def connect(seq1: String, seq2: String): IndexedSeq[String] =
