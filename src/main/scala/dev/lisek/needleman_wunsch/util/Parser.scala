@@ -9,6 +9,7 @@ object Parser:
         "gap" -> -1,
         "mismatch" -> -1,
         "output" -> "",
+        "tracklimit" -> Int.MaxValue,
         "plot" -> true
     )
 
@@ -32,11 +33,11 @@ object Parser:
         println("\nUsage: needleman-wunsch [options] [-f] sequence1 [-f] sequence2")
         println("Options:")
         println("  -f, --file FILENAME      Parse from file instead of stdin")
-        println("  -g, --gap VALUE          Penalty for gap")
-        println("  -m, --mismatch VALUE     Penalty for mismatch")
         println("  -o, --output FILE        File to output statistics to")
-        println("  -q, --quiet              Do not plot a graph (useful for large strings)")
         println("  -s, --match VALUE        Score for match")
+        println("  -m, --mismatch VALUE     Penalty for mismatch")
+        println("  -g, --gap VALUE          Penalty for gap")
+        println("  -n, --nograph            Do not plot a graph")
 
         System.exit(if (option.toString.isEmpty) 0 else 1)
 
@@ -47,9 +48,10 @@ object Parser:
                 case ("-f" | "--file") :: value :: tail => nextArg(map + ("sequences" -> (sequenceList(map) :+ fromFASTA(value))), tail)
                 case ("-g" | "--gap") :: value :: tail => nextArg(map + ("gap" -> value.toInt), tail)
                 case ("-m" | "--mismatch") :: value :: tail => nextArg(map + ("mismatch" -> value.toInt), tail)
+                case ("-n" | "--nograph") :: tail => nextArg(map + ("plot" -> false), tail)
                 case ("-o" | "--output") :: value :: tail => nextArg(map + ("output" -> value), tail)
-                case ("-q" | "--quiet") :: tail => nextArg(map + ("plot" -> false), tail)
                 case ("-s" | "--match") :: value :: tail => nextArg(map + ("match" -> value.toInt), tail)
+                case ("-t" | "--tracklimit") :: value :: tail => nextArg(map + ("tracklimit" -> value.toInt), tail)
                 case value :: tail => nextArg(map + ("sequences" -> (sequenceList(map) :+ (value, value))), tail)
         catch
             case _: NumberFormatException => printUsage("NOT_A_NUMBER"); Map()

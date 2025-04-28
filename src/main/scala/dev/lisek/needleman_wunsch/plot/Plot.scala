@@ -66,11 +66,10 @@ object Plot:
         println(s"${tracks.size} best tracks found")
         println("Enter track number to display it:")
 
-
         while frame.isVisible do
             try
                 update(group(plot1, plot2(readInt - 1), ZDepth))
-                print("\u033c")
+                // print("\u033c")
             catch
                 case _: NumberFormatException =>
                 case _: ArrayIndexOutOfBoundsException =>
