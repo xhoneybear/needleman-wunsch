@@ -34,6 +34,3 @@ def main(args: String*) =
         params.maxTracks,
         params.createGraph
     )
-
-    if !params.outputFile.isBlank then
-        writer.close()

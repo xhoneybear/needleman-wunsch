@@ -2,6 +2,7 @@ package dev.lisek.needleman_wunsch.plot
 
 import dev.lisek.needleman_wunsch.algorithm.Track.tracePath
 import dev.lisek.needleman_wunsch.ZDepth
+import javax.swing.WindowConstants.EXIT_ON_CLOSE
 import org.nspl._ 
 import org.nspl.awtrenderer._ 
 import org.nspl.data.DataMatrix
@@ -62,6 +63,7 @@ object Plot:
         val plot = group(plot1, plot2(0), ZDepth)
 
         val (frame, update) = show(plot)
+        frame.setDefaultCloseOperation(EXIT_ON_CLOSE)
 
         println(s"${tracks.size} best tracks found")
         println("Enter track number to display it:")

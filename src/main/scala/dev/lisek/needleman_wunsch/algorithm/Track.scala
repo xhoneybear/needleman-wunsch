@@ -46,6 +46,9 @@ object Track:
 
         output(file, out)
 
+        if file != null then
+            file.close
+
         if (createGraph)
             plot(seq1, seq2, matrix, tracks)
 
