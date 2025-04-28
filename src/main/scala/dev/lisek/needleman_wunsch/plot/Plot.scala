@@ -55,12 +55,13 @@ object Plot:
             .xNoTickLabel(true)
             .yNoTickLabel(true)
         )
-        def plot2(i: Int) = xyplot(tracePath(tracks(i)._1, tracks(i)._2) -> line(
+
+        def plot2(i: Int) = xyplot(tracePath(tracks(i)(0), tracks(i)(1)) -> line(
             color = Color(32, 48, 64),
             stroke = StrokeConf((8*cellSize).fts)
         ))(par2)
 
-        val plot = group(plot1, plot2(0), ZDepth)
+        val plot = group(plot1, xyplot()(par2), ZDepth)
 
         val (frame, update) = show(plot)
         frame.setDefaultCloseOperation(EXIT_ON_CLOSE)

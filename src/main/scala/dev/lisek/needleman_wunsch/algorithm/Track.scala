@@ -71,12 +71,12 @@ object Track:
         var ret: Array[(String, String)] = Array.empty[(String, String)]
 
         if (y == 0 || x == 0)
-            var sub1 = seq1.take(y+1)
-            var sub2 = seq2.take(x+1)
+            var sub1 = seq1.take(y)
+            var sub2 = seq2.take(x)
             if (y > 0)
-                sub2 = "-" * (sub1.size - 1) ++ sub2
+                sub2 = "-" * (sub1.size) ++ sub2
             else if (x > 0)
-                sub1 = "-" * (sub2.size - 1) ++ sub1
+                sub1 = "-" * (sub2.size) ++ sub1
             val trace1 = (sub1 +: alignSeq1).mkString
             val trace2 = (sub2 +: alignSeq2).mkString
 
