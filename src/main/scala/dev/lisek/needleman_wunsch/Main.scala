@@ -8,7 +8,7 @@ import dev.lisek.needleman_wunsch.util.Parameters
 
 @main
 def main(args: String*) =
-    val params = Parameters(args)
+    val params = parse(args)
     var file = null: java.io.File
     var writer = null: java.io.FileWriter
 

@@ -21,11 +21,13 @@ object Parser:
         val seq = file.filterNot(_.startsWith(">")).mkString
         (title, seq)
 
-    private def printUsage(option: String | Int = "") =
-        if (option != 2)
-            println(s"Got $option sequence arguments, required 2")
-        else if (!option.asInstanceOf[String].isEmpty)
+    private def printUsage(option: String = "") =
+        if (option.startsWith("-"))
             println(s"Unrecognized option: $option")
+        else if (option.startsWith("NOT_A_NUMBER"))
+            println("Invalid value for an integer argument")
+        else if (!option.isEmpty)
+            println(s"Got $option sequence arguments, required 2")
         else
             println("Needleman-Wunsch algorithm")
             println("Compare two sequences and display their similarity statistics.")
@@ -52,12 +54,18 @@ object Parser:
                 case ("-o" | "--output") :: value :: tail => nextArg(map + ("output" -> value), tail)
                 case ("-s" | "--match") :: value :: tail => nextArg(map + ("match" -> value.toInt), tail)
                 case ("-t" | "--tracklimit") :: value :: tail => nextArg(map + ("tracklimit" -> value.toInt), tail)
+                case value :: _ if value.startsWith("-") => printUsage(value); Map()
                 case value :: tail => nextArg(map + ("sequences" -> (sequenceList(map) :+ (value, value))), tail)
         catch
             case _: NumberFormatException => printUsage("NOT_A_NUMBER"); Map()
 
-    def parse(args: Seq[String]): Map[String, Any] =
+    def parse(args: Seq[String]): Parameters =
         if (args.contains("-h") || args.contains("--help"))
             printUsage()
 
-        nextArg(defaultArgs, args)
+        val parsedArgs = Parameters(nextArg(defaultArgs, args))
+
+        if (parsedArgs.sequences.size != 2)
+            printUsage(parsedArgs.sequences.size.toString)
+
+        parsedArgs
