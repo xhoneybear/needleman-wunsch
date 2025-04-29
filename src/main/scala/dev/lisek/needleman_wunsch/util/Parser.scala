@@ -39,6 +39,7 @@ object Parser:
         println("  -s, --match VALUE        Score for match")
         println("  -m, --mismatch VALUE     Penalty for mismatch")
         println("  -g, --gap VALUE          Penalty for gap")
+        println("  -t, --tracklimit VALUE   Maximum number of tracks to plot")
         println("  -n, --nograph            Do not plot a graph")
 
         System.exit(if (option.toString.isEmpty) 0 else 1)
