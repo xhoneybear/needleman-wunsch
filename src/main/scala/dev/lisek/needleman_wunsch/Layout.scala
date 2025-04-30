@@ -3,7 +3,19 @@ package dev.lisek.needleman_wunsch
 import org.nspl._
 import org.nspl.Align._
 
-def outline(
+/**
+  * Modified LayoutHelper from nspl.
+  * Adjusted for plot stacking.
+  */
+object Layout:
+  /**
+    * Calculates the outline of a set of bounds.
+    *
+    * @param members1 Bounds
+    * @param anchor Anchor
+    * @return Outline
+    */
+  def outline(
       members1: Iterator[Bounds],
       anchor: Option[Point]
   ) = {
@@ -40,6 +52,12 @@ def outline(
     }
   }
 
+  /**
+    * Transposes a matrix.
+    *
+    * @param a Matrix to transpose
+    * @return Transposed matrix
+    */
   def transpose[A](a: Seq[Seq[A]]) = {
     if (a.isEmpty) a
     else {
@@ -52,7 +70,18 @@ def outline(
     }
   }
 
-def alignToAnchors[F: FC](
+  /**
+    * Modified anchor alignment function from nspl.
+    * Combines row and column alignment functions and allows stacking.
+    *
+    * @param table Boundary table
+    * @param horizontalGap Horizontal gap
+    * @param verticalGap Vertical gap
+    * @param alignRows Whether to align rows
+    * @param alignCols Whether to align columns
+    * @return
+    */
+  def alignToAnchors[F: FC](
       table: Seq[Seq[Bounds]],
       horizontalGap: RelFontSize,
       verticalGap: RelFontSize,
@@ -93,49 +122,10 @@ def alignToAnchors[F: FC](
     }
   }
 
-/** A Layout which puts elements into rows.*/
-case class TableLayout(
-    columns: Int,
-    horizontalGap: RelFontSize = 0.5.fts,
-    verticalGap: RelFontSize = 0.5.fts
-) extends Layout {
-
-  def apply[F: FC](s: Seq[Bounds]) = {
-    if (s.isEmpty) s
-    else
-      alignToAnchors(
-        s.grouped(columns).toList,
-        horizontalGap,
-        verticalGap,
-        true,
-        false
-      )
-  }
-}
-
-/** A Layout which puts elements into columns.*/
-case class ColumnLayout(
-    numRows: Int,
-    horizontalGap: RelFontSize = 0.5.fts,
-    verticalGap: RelFontSize = 0.5.fts
-) extends Layout {
-  def apply[F: FC](s: Seq[Bounds]) = {
-    if (s.isEmpty) s
-    else
-      alignToAnchors(
-        s.grouped(numRows).toList,
-        horizontalGap,
-        verticalGap,
-        false,
-        true
-      )
-  }
-}
-
 /** A Layout which stacks elements on top of each other.*/
 object ZDepth extends Layout {
   def apply[F: FC](s: Seq[Bounds]) = {
     if (s.isEmpty) s
-    else alignToAnchors(Seq(s), 0.fts, 0.fts, false, false)
+    else Layout.alignToAnchors(Seq(s), 0.fts, 0.fts, false, false)
   }
 }
