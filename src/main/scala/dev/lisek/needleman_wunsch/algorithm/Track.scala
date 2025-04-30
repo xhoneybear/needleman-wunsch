@@ -6,56 +6,41 @@ import java.io.FileWriter
 import dev.lisek.needleman_wunsch.plot.plot
 import dev.lisek.needleman_wunsch.util.StringUtils.output
 import dev.lisek.needleman_wunsch.util.StringUtils.resultString
+import dev.lisek.needleman_wunsch.util.Parameters
 
-/** Tracks the optimal alignments. */
-object Track:
+/**
+  * Tracks the optimal alignments.
+  *
+  * @param par Parsed command-line parameters
+  * @param file FileWriter to write to
+  * @param matrix Matrix to backtrack
+  */
+class Track(
+    par: Parameters,
+    file: FileWriter
+):
+    val matrix = heatmap(par)
     var tracks: Array[(String, String)] = Array()
 
-    /**
-      * Backtracks the matrix to find the optimal alignments.
-      *
-      * @param file FileWriter to write to
-      * @param matrix Matrix to backtrack
-      * @param seq1 First sequence with title
-      * @param seq2 Second sequence with title
-      * @param matchValue Points to add if characters match
-      * @param gapValue Points to add if there is a gap
-      * @param mismatchValue Points to add if characters don't match
-      * @param maxTracks Maximum number of tracks to calculate
-      * @param createGraph Whether to create a graph
-      */
-    def backtrack(
-        file: FileWriter,
-        matrix: Array[Array[Double]],
-        seq1: (String, String),
-        seq2: (String, String),
-        matchValue: Int,
-        gapValue: Int,
-        mismatchValue: Int,
-        maxTracks: Int,
-        createGraph: Boolean
-    ): Unit =
+    /** Backtracks the matrix to find the optimal alignments. */
+    def backtrack: Unit =
         var out = "--- Evaluation results ---\n"
-        out ++= s"\nSequence 1: ${seq1(0)}"
-        out ++= s"\nSequence 2: ${seq2(0)}\n"
+        out ++= s"\nSequence 1: ${par.seq1}"
+        out ++= s"\nSequence 2: ${par.seq2}\n"
+        out ++= s"\nParameters:\n"
+        out ++= s"- Match value: ${par.matchValue}\n"
+        out ++= s"- Mismatch value: ${par.mismatchValue}\n"
+        out ++= s"- Gap value: ${par.gapValue}\n"
         out ++= "\nConnections:\n\n"
 
         output(file, out)
 
         stepBack(
-            file,
-            matrix,
-            seq1(1),
-            seq2(1),
-            matchValue,
-            gapValue,
-            mismatchValue,
-            maxTracks,
-            seq1(1).length,
-            seq2(1).length
+            par.seq1.length,
+            par.seq2.length
         )
 
-        out = s"Similarity score: ${matrix(seq1(1).length)(seq2(1).length)}"
+        out = s"Similarity score: ${matrix(par.seq1.length)(par.seq2.length)}"
 
         output(file, out)
 
@@ -63,48 +48,32 @@ object Track:
         if file != null then
             file.close
 
-        if (createGraph)
-            plot(seq1, seq2, matrix, tracks)
+        if (par.createGraph)
+            plot(par.sequences(0), par.sequences(1), matrix, tracks)
 
     /**
       * Recursively performs a backtrack step.
       *
-      * @param file FileWriter to write to
-      * @param matrix Matrix to backtrack
-      * @param seq1 First sequence
-      * @param seq2 Second sequence
-      * @param matchValue Points to add if characters match
-      * @param gapValue Points to add if there is a gap
-      * @param mismatchValue Points to add if characters don't match
-      * @param maxTracks Maximum number of tracks to calculate
-      * @param y Dynamic position in seq1
-      * @param x Dynamic position in seq2
-      * @param alignSeq1 Calculated sequence 1 with gaps
-      * @param alignSeq2 Calculated sequence 2 with gaps
+      * @param y Position in seq1
+      * @param x Position in seq2
+      * @param alignSeq1 Sequence 1 aligned with gaps
+      * @param alignSeq2 Sequence 2 aligned with gaps
       */
     private def stepBack(
-        file: FileWriter,
-        matrix: Array[Array[Double]],
-        seq1: String,
-        seq2: String,
-        matchValue: Int,
-        gapValue: Int,
-        mismatchValue: Int,
-        maxTracks: Int,
-        y: Int = -1,
-        x: Int = -1,
+        y: Int,
+        x: Int,
         alignSeq1: Seq[Char] = Seq(),
         alignSeq2: Seq[Char] = Seq()
     ): Unit =
-        if tracks.length >= maxTracks then return
+        if tracks.length >= par.maxTracks then return
 
         var ret: Array[(String, String)] = Array.empty[(String, String)]
 
         // Finish recursion on boundary
         if (y == 0 || x == 0)
             // Take remaining characters
-            var sub1 = seq1.take(y)
-            var sub2 = seq2.take(x)
+            var sub1 = par.seq1.take(y)
+            var sub2 = par.seq2.take(x)
 
             // Pad the other sequence
             if (y > 0)
@@ -122,12 +91,12 @@ object Track:
             tracks = tracks :+ (track1.mkString, track2.mkString)
 
         else    // Check possible moves
-            if (matrix(y)(x) == matrix(y-1)(x-1) + (if (seq1(y-1) == seq2(x-1)) matchValue else mismatchValue))
+            if (matrix(y)(x) == matrix(y-1)(x-1) + (if (par.seq1(y-1) == par.seq2(x-1)) par.matchValue else par.mismatchValue))
                 // Diagonal move (match/mismatch)
-                stepBack(file, matrix, seq1, seq2, matchValue, gapValue, mismatchValue, maxTracks, y - 1, x - 1, seq1(y-1) +: alignSeq1, seq2(x-1) +: alignSeq2)
-            if (matrix(y)(x) == matrix(y-1)(x) + gapValue)
+                stepBack(y - 1, x - 1, par.seq1(y-1) +: alignSeq1, par.seq2(x-1) +: alignSeq2)
+            if (matrix(y)(x) == matrix(y-1)(x) + par.gapValue)
                 // Up move (gap in seq2)
-                stepBack(file, matrix, seq1, seq2, matchValue, gapValue, mismatchValue, maxTracks, y - 1, x, seq1(y-1) +: alignSeq1, '-' +: alignSeq2)
-            if (matrix(y)(x) == matrix(y)(x-1) + gapValue)
+                stepBack(y - 1, x, par.seq1(y-1) +: alignSeq1, '-' +: alignSeq2)
+            if (matrix(y)(x) == matrix(y)(x-1) + par.gapValue)
                 // Left move (gap in seq1)
-                stepBack(file, matrix, seq1, seq2, matchValue, gapValue, mismatchValue, maxTracks, y, x - 1, '-' +: alignSeq1, seq2(x-1) +: alignSeq2)
+                stepBack(y, x - 1, '-' +: alignSeq1, par.seq2(x-1) +: alignSeq2)

@@ -1,7 +1,7 @@
 package dev.lisek.needleman_wunsch
 
 import dev.lisek.needleman_wunsch.algorithm.heatmap
-import dev.lisek.needleman_wunsch.algorithm.Track.backtrack
+import dev.lisek.needleman_wunsch.algorithm.Track
 import dev.lisek.needleman_wunsch.util.Parser.parse
 
 /**
@@ -23,24 +23,5 @@ def main(args: String*) =
         file = new java.io.File(params.outputFile)
         writer = new java.io.FileWriter(file)
 
-    // Create score matrix
-    val grid = heatmap(
-        params.sequences(0)(1),
-        params.sequences(1)(1),
-        params.matchValue,
-        params.gapValue,
-        params.mismatchValue
-    )
-
     // Find optimal alignments
-    val tracks = backtrack(
-        writer,
-        grid,
-        params.sequences(0),
-        params.sequences(1),
-        params.matchValue,
-        params.gapValue,
-        params.mismatchValue,
-        params.maxTracks,
-        params.createGraph
-    )
+    val tracks = Track(params, writer).backtrack
