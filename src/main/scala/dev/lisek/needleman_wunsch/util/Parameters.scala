@@ -2,6 +2,11 @@ package dev.lisek.needleman_wunsch.util
 
 import dev.lisek.needleman_wunsch.util.Parser.parse
 
+/**
+  * Parsed command-line parameters.
+  *
+  * @param args
+  */
 class Parameters(args: Map[String, Any]):
     val sequences = args.get("sequences").get.asInstanceOf[List[(String, String)]]
     val matchValue = args.get("match").get.asInstanceOf[Int]

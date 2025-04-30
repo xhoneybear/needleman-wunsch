@@ -13,14 +13,32 @@ object Parser:
         "plot" -> true
     )
 
-    private def sequenceList(map: Map[String, Any]): List[(String, String)] = map.get("sequences").get.asInstanceOf[List[(String, String)]]
+    /**
+      * Extracts sequences from command-line argument map.
+      *
+      * @param map Command-line argument map
+      * @return List of sequences
+      */
+    private def sequenceList(map: Map[String, Any]): List[(String, String)] =
+        map.get("sequences").get.asInstanceOf[List[(String, String)]]
 
+    /**
+      * Reads a sequence from a FASTA file.
+      *
+      * @param path Path to file
+      * @return Title and sequence
+      */
     private def fromFASTA(path: String): (String, String) =
         val file = fromFile(path).getLines.toStream
         val title = file.filter(_.startsWith(">")).mkString.replace(">", "")
         val seq = file.filterNot(_.startsWith(">")).mkString
         (title, seq)
 
+    /**
+      * Prints a help message.
+      *
+      * @param option Error code, faulty argument or sequence count
+      */
     private def printUsage(option: String = "") =
         if (option.startsWith("-"))
             println(s"Unrecognized option: $option")
@@ -44,6 +62,13 @@ object Parser:
 
         System.exit(if (option.toString.isEmpty) 0 else 1)
 
+    /**
+      * Recursively process command-line arguments.
+      *
+      * @param map Command-line argument map
+      * @param args Command-line arguments
+      * @return Parsed command-line argument map
+      */
     private def nextArg(map: Map[String, Any], args: Seq[String]): Map[String, Any] =
         try
             args match
@@ -60,6 +85,12 @@ object Parser:
         catch
             case _: NumberFormatException => printUsage("NOT_A_NUMBER"); Map()
 
+    /**
+      * Parse command-line arguments.
+      *
+      * @param args Command-line arguments
+      * @return Parsed command-line arguments
+      */
     def parse(args: Seq[String]): Parameters =
         if (args.contains("-h") || args.contains("--help"))
             printUsage()
