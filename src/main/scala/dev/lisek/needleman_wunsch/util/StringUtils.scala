@@ -8,8 +8,8 @@ object StringUtils:
     /**
       * Creates a result string.
       *
-      * @param seq1 First sequence title
-      * @param seq2 Second sequence title
+      * @param seq1 First sequence
+      * @param seq2 Second sequence
       * @return Result string
       */
     def resultString(

@@ -13,43 +13,33 @@ import dev.lisek.needleman_wunsch.util.Parameters
   *
   * @param par Parsed command-line parameters
   * @param file FileWriter to write to
-  * @param matrix Matrix to backtrack
   */
 class Track(
     par: Parameters,
-    file: FileWriter
+    file: FileWriter,
+    seq1: (String, String),
+    seq2: (String, String)
 ):
-    val matrix = heatmap(par)
+    val matrix = heatmap(par, seq1._2, seq2._2)
+    val score = matrix(seq1._2.length)(seq2._2.length)
     var tracks: Array[(String, String)] = Array()
 
     /** Backtracks the matrix to find the optimal alignments. */
     def backtrack: Unit =
-        var out = "--- Evaluation results ---\n"
-        out ++= s"\nSequence 1: ${par.seq1}"
-        out ++= s"\nSequence 2: ${par.seq2}\n"
-        out ++= s"\nParameters:\n"
-        out ++= s"- Match value: ${par.matchValue}\n"
-        out ++= s"- Mismatch value: ${par.mismatchValue}\n"
-        out ++= s"- Gap value: ${par.gapValue}\n"
-        out ++= "\nConnections:\n\n"
-
-        output(file, out)
-
         stepBack(
-            par.seq1.length,
-            par.seq2.length
+            seq1._2.length,
+            seq2._2.length
         )
 
-        out = s"Similarity score: ${matrix(par.seq1.length)(par.seq2.length)}"
-
-        output(file, out)
+        if !par.quiet then
+            output(file, s"Similarity score: ${matrix(seq1._2.length)(seq2._2.length)}\n\n")
 
         // Close the FileWriter
-        if file != null then
-            file.close
+        // if file != null then
+        //     file.close
 
         if (par.createGraph)
-            plot(par.sequences(0), par.sequences(1), matrix, tracks)
+            plot(seq1, seq2, matrix, tracks)
 
     /**
       * Recursively performs a backtrack step.
@@ -72,8 +62,8 @@ class Track(
         // Finish recursion on boundary
         if (y == 0 || x == 0)
             // Take remaining characters
-            var sub1 = par.seq1.take(y)
-            var sub2 = par.seq2.take(x)
+            var sub1 = seq1._2.take(y)
+            var sub2 = seq2._2.take(x)
 
             // Pad the other sequence
             if (y > 0)
@@ -85,18 +75,19 @@ class Track(
             val track1 = (sub1 +: alignSeq1).mkString
             val track2 = (sub2 +: alignSeq2).mkString
 
-            output(file, resultString(track1, track2))
+            if !par.quiet then
+                output(file, resultString(track1, track2))
 
             // Add to tracks
             tracks = tracks :+ (track1.mkString, track2.mkString)
 
         else    // Check possible moves
-            if (matrix(y)(x) == matrix(y-1)(x-1) + (if (par.seq1(y-1) == par.seq2(x-1)) par.matchValue else par.mismatchValue))
+            if (matrix(y)(x) == matrix(y-1)(x-1) + (if (seq1._2(y-1) == seq2._2(x-1)) par.matchValue else par.mismatchValue))
                 // Diagonal move (match/mismatch)
-                stepBack(y - 1, x - 1, par.seq1(y-1) +: alignSeq1, par.seq2(x-1) +: alignSeq2)
+                stepBack(y - 1, x - 1, seq1._2(y-1) +: alignSeq1, seq2._2(x-1) +: alignSeq2)
             if (matrix(y)(x) == matrix(y-1)(x) + par.gapValue)
                 // Up move (gap in seq2)
-                stepBack(y - 1, x, par.seq1(y-1) +: alignSeq1, '-' +: alignSeq2)
+                stepBack(y - 1, x, seq1._2(y-1) +: alignSeq1, '-' +: alignSeq2)
             if (matrix(y)(x) == matrix(y)(x-1) + par.gapValue)
                 // Left move (gap in seq1)
-                stepBack(y, x - 1, '-' +: alignSeq1, par.seq2(x-1) +: alignSeq2)
+                stepBack(y, x - 1, '-' +: alignSeq1, seq2._2(x-1) +: alignSeq2)

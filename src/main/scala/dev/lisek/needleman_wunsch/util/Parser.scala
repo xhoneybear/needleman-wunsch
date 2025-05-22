@@ -10,6 +10,7 @@ object Parser:
         "mismatch" -> -1,
         "output" -> "",
         "tracklimit" -> Int.MaxValue,
+        "quiet" -> false,
         "plot" -> true
     )
 
@@ -45,7 +46,7 @@ object Parser:
         else if (option.startsWith("NOT_A_NUMBER"))
             println("Invalid value for an integer argument")
         else if (!option.isEmpty)
-            println(s"Got $option sequence arguments, required 2")
+            println(s"Got $option sequence arguments, required 2 or more")
         else
             println("Needleman-Wunsch algorithm")
             println("Compare two sequences and display their similarity statistics.")
@@ -78,6 +79,7 @@ object Parser:
                 case ("-m" | "--mismatch") :: value :: tail => nextArg(map + ("mismatch" -> value.toInt), tail)
                 case ("-n" | "--nograph") :: tail => nextArg(map + ("plot" -> false), tail)
                 case ("-o" | "--output") :: value :: tail => nextArg(map + ("output" -> value), tail)
+                case ("-q" | "--quiet") :: tail => nextArg(map + ("quiet" -> true), tail)
                 case ("-s" | "--match") :: value :: tail => nextArg(map + ("match" -> value.toInt), tail)
                 case ("-t" | "--tracklimit") :: value :: tail => nextArg(map + ("tracklimit" -> value.toInt), tail)
                 case value :: _ if value.startsWith("-") => printUsage(value); Map()
@@ -97,7 +99,12 @@ object Parser:
 
         val parsedArgs = Parameters(nextArg(defaultArgs, args))
 
-        if (parsedArgs.sequences.size != 2)
+        if (parsedArgs.sequences.size < 2)
             printUsage(parsedArgs.sequences.size.toString)
+        else if (parsedArgs.sequences.size > 2) {
+            parsedArgs.maxTracks = 1
+            parsedArgs.quiet = true
+            parsedArgs.createGraph = false
+        }
 
         parsedArgs
